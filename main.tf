@@ -142,7 +142,7 @@ module "log-group-role" {
       instance_profile     = null
       path                 = null
       desc                 = null
-      trust_policy_file    = "api-gateway.json"
+      trust_policy_file    = "data/api-gateway.json"
       permissions_boundary = null
       policies             = []
       policy_arns = [
