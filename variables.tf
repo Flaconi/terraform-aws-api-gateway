@@ -123,3 +123,9 @@ variable "vpc_endpoint_ids" {
   default     = []
   description = "list of vpc endpoint ids for a private api to be assigned"
 }
+
+variable "cognito_provider_arns" {
+  type        = set(string)
+  default     = []
+  description = "List of Cognito user pool ARNS"
+}

@@ -127,6 +127,14 @@ Type: `list(string)`
 
 Default: `[]`
 
+### <a name="input_cognito_provider_arns"></a> [cognito\_provider\_arns](#input\_cognito\_provider\_arns)
+
+Description: List of Cognito user pool ARNS
+
+Type: `set(string)`
+
+Default: `[]`
+
 <!-- TFDOCS_INPUTS_END -->
 
 <!-- TFDOCS_OUTPUTS_START -->
@@ -134,6 +142,7 @@ Default: `[]`
 
 | Name | Description |
 |------|-------------|
+| <a name="output_cognito_authorizer_id"></a> [cognito\_authorizer\_id](#output\_cognito\_authorizer\_id) | The authorizer ID of the REST API's cognito authorizer |
 | <a name="output_id"></a> [id](#output\_id) | The ID of the REST API |
 | <a name="output_root_resource_id"></a> [root\_resource\_id](#output\_root\_resource\_id) | The resource ID of the REST API's root |
 

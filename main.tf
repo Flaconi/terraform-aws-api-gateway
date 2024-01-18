@@ -1,9 +1,10 @@
 locals {
-  enabled                = var.enabled
-  create_rest_api_policy = local.enabled && var.rest_api_policy != null
-  create_log_group       = local.enabled && var.logging_level != "OFF"
-  vpc_endpoint_enabled   = length(var.vpc_endpoint_ids) > 0
-  log_group_arn          = local.create_log_group ? module.log-group.cloudwatch_log_group_arn : null
+  enabled                   = var.enabled
+  create_rest_api_policy    = local.enabled && var.rest_api_policy != null
+  create_log_group          = local.enabled && var.logging_level != "OFF"
+  vpc_endpoint_enabled      = length(var.vpc_endpoint_ids) > 0
+  log_group_arn             = local.create_log_group ? module.log-group.cloudwatch_log_group_arn : null
+  create_cognito_authorizer = local.enabled && length(var.cognito_provider_arns) > 0
 }
 
 resource "aws_api_gateway_rest_api" "this" {
@@ -119,6 +120,17 @@ resource "aws_api_gateway_method_settings" "all" {
     logging_level   = var.logging_level
   }
 }
+
+# authorizer
+
+resource "aws_api_gateway_authorizer" "cognito" {
+  count         = local.create_cognito_authorizer ? 1 : 0
+  name          = "cognito"
+  rest_api_id   = aws_api_gateway_rest_api.this[0].id
+  type          = "COGNITO_USER_POOLS"
+  provider_arns = var.cognito_provider_arns
+}
+
 # if logging is enabled we create a log group for the access logs and also make sure that the api gateway is able to log to the group
 module "log-group" {
   source = "github.com/terraform-aws-modules/terraform-aws-cloudwatch//modules/log-group?ref=v5.1.0"
