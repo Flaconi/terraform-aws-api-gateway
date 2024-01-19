@@ -21,6 +21,7 @@ For requirements regarding module structure: [style-guide-terraform.md](https://
 | Name | Version |
 |------|---------|
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
+| <a name="provider_random"></a> [random](#provider\_random) | >= 3.6 |
 
 <!-- TFDOCS_PROVIDER_END -->
 
@@ -31,6 +32,7 @@ For requirements regarding module structure: [style-guide-terraform.md](https://
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
+| <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.6 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
 
@@ -135,6 +137,22 @@ Type: `set(string)`
 
 Default: `[]`
 
+### <a name="input_default_integration_enabled"></a> [default\_integration\_enabled](#input\_default\_integration\_enabled)
+
+Description: Set to true to enable a initial default integration to allow policy deployments for a sharded gateway
+
+Type: `bool`
+
+Default: `false`
+
+### <a name="input_resource_paths"></a> [resource\_paths](#input\_resource\_paths)
+
+Description: a list of root resource paths to be used in sharded environment
+
+Type: `list(string)`
+
+Default: `[]`
+
 <!-- TFDOCS_INPUTS_END -->
 
 <!-- TFDOCS_OUTPUTS_START -->
@@ -142,8 +160,10 @@ Default: `[]`
 
 | Name | Description |
 |------|-------------|
+| <a name="output_api_url"></a> [api\_url](#output\_api\_url) | The URL to invoke the API pointing to the stage |
 | <a name="output_cognito_authorizer_id"></a> [cognito\_authorizer\_id](#output\_cognito\_authorizer\_id) | The authorizer ID of the REST API's cognito authorizer |
 | <a name="output_id"></a> [id](#output\_id) | The ID of the REST API |
+| <a name="output_resources_paths_map"></a> [resources\_paths\_map](#output\_resources\_paths\_map) | Map of resource paths to id in api gateway |
 | <a name="output_root_resource_id"></a> [root\_resource\_id](#output\_root\_resource\_id) | The resource ID of the REST API's root |
 
 <!-- TFDOCS_OUTPUTS_END -->

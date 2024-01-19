@@ -129,3 +129,15 @@ variable "cognito_provider_arns" {
   default     = []
   description = "List of Cognito user pool ARNS"
 }
+
+variable "default_integration_enabled" {
+  type        = bool
+  default     = false
+  description = "Set to true to enable a initial default integration to allow policy deployments for a sharded gateway"
+}
+
+variable "resource_paths" {
+  type        = list(string)
+  default     = []
+  description = "a list of root resource paths to be used in sharded environment"
+}
