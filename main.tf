@@ -1,10 +1,11 @@
 locals {
-  enabled                   = var.enabled
-  create_rest_api_policy    = local.enabled && var.rest_api_policy != null
-  create_log_group          = local.enabled && var.logging_level != "OFF"
-  vpc_endpoint_enabled      = length(var.vpc_endpoint_ids) > 0
-  log_group_arn             = local.create_log_group ? module.log-group.cloudwatch_log_group_arn : null
-  create_cognito_authorizer = local.enabled && length(var.cognito_provider_arns) > 0
+  enabled                     = var.enabled
+  default_integration_enabled = var.enabled && var.default_integration_enabled
+  create_rest_api_policy      = local.enabled && var.rest_api_policy != null
+  create_log_group            = local.enabled && var.logging_level != "OFF"
+  vpc_endpoint_enabled        = length(var.vpc_endpoint_ids) > 0
+  log_group_arn               = local.create_log_group ? module.log-group.cloudwatch_log_group_arn : null
+  create_cognito_authorizer   = local.enabled && length(var.cognito_provider_arns) > 0
 }
 
 resource "aws_api_gateway_rest_api" "this" {
@@ -118,6 +119,77 @@ resource "aws_api_gateway_method_settings" "all" {
   settings {
     metrics_enabled = var.metrics_enabled
     logging_level   = var.logging_level
+  }
+}
+
+resource "aws_api_gateway_resource" "resource_paths" {
+  for_each = { for k in var.resource_paths : k => k }
+
+  rest_api_id = aws_api_gateway_rest_api.this[0].id
+  parent_id   = aws_api_gateway_rest_api.this[0].root_resource_id
+  path_part   = each.value
+}
+
+#create default integration
+
+resource "random_id" "path_part" {
+  count       = local.default_integration_enabled ? 1 : 0
+  byte_length = 8
+  prefix      = "default-path-"
+}
+
+resource "aws_api_gateway_resource" "default_resource" {
+  count       = local.default_integration_enabled ? 1 : 0
+  rest_api_id = aws_api_gateway_rest_api.this[0].id
+  parent_id   = aws_api_gateway_rest_api.this[0].root_resource_id
+  path_part   = random_id.path_part[0].b64_url
+}
+
+resource "aws_api_gateway_method" "default_method" {
+  count         = local.default_integration_enabled ? 1 : 0
+  rest_api_id   = aws_api_gateway_rest_api.this[0].id
+  resource_id   = aws_api_gateway_resource.default_resource[0].id
+  http_method   = "ANY"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_integration" "default_integration" {
+  count       = local.default_integration_enabled ? 1 : 0
+  rest_api_id = aws_api_gateway_rest_api.this[0].id
+  resource_id = aws_api_gateway_resource.default_resource[0].id
+  http_method = aws_api_gateway_method.default_method[0].http_method
+  type        = "MOCK"
+  request_templates = {
+    "application/json" = jsonencode(
+      {
+        statusCode = 200
+      }
+    )
+  }
+}
+
+resource "aws_api_gateway_method_response" "response_200" {
+  count       = local.default_integration_enabled ? 1 : 0
+  rest_api_id = aws_api_gateway_rest_api.this[0].id
+  resource_id = aws_api_gateway_resource.default_resource[0].id
+  http_method = aws_api_gateway_method.default_method[0].http_method
+  status_code = "200"
+}
+
+resource "aws_api_gateway_integration_response" "default_integration_response" {
+  count       = local.default_integration_enabled ? 1 : 0
+  rest_api_id = aws_api_gateway_rest_api.this[0].id
+  resource_id = aws_api_gateway_resource.default_resource[0].id
+  http_method = aws_api_gateway_method.default_method[0].http_method
+  status_code = aws_api_gateway_method_response.response_200[0].status_code
+
+  # Transforms the backend JSON response to XML
+  response_templates = {
+    "application/json" = jsonencode(
+      {
+        statusCode = 200
+      }
+    )
   }
 }
 
