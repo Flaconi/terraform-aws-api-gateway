@@ -193,6 +193,18 @@ resource "aws_api_gateway_integration_response" "default_integration_response" {
   }
 }
 
+# gateway response
+
+resource "aws_api_gateway_gateway_response" "gateway_response" {
+  for_each      = var.gateway_response
+  rest_api_id   = aws_api_gateway_rest_api.this[0].id
+  response_type = each.key
+  status_code   = each.value.status_code
+  response_templates = {
+    "application/json" = each.value.response_templates.json
+  }
+}
+
 # authorizer
 
 resource "aws_api_gateway_authorizer" "cognito" {

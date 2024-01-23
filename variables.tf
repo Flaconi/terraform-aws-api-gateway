@@ -141,3 +141,15 @@ variable "resource_paths" {
   default     = []
   description = "a list of root resource paths to be used in sharded environment"
 }
+
+variable "gateway_response" {
+  #response_type => {response_templates}
+  type = map(object({
+    status_code = number
+    #https://docs.aws.amazon.com/apigateway/latest/developerguide/supported-gateway-response-types.html
+    response_templates = object({
+      json = string
+    })
+  }))
+  default = {}
+}

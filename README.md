@@ -153,6 +153,24 @@ Type: `list(string)`
 
 Default: `[]`
 
+### <a name="input_gateway_response"></a> [gateway\_response](#input\_gateway\_response)
+
+Description: n/a
+
+Type:
+
+```hcl
+map(object({
+    status_code = number
+    #https://docs.aws.amazon.com/apigateway/latest/developerguide/supported-gateway-response-types.html
+    response_templates = object({
+      json = string
+    })
+  }))
+```
+
+Default: `{}`
+
 <!-- TFDOCS_INPUTS_END -->
 
 <!-- TFDOCS_OUTPUTS_START -->
