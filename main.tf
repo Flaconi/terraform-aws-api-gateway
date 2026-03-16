@@ -6,6 +6,7 @@ locals {
   vpc_endpoint_enabled        = length(var.vpc_endpoint_ids) > 0
   log_group_arn               = local.create_log_group ? module.log-group.cloudwatch_log_group_arn : null
   create_cognito_authorizer   = local.enabled && length(var.cognito_provider_arns) > 0
+  create_custom_domain        = local.enabled && var.domain_name != null && var.certificate_arn != null
 }
 
 resource "aws_api_gateway_rest_api" "this" {
@@ -28,6 +29,53 @@ resource "aws_api_gateway_rest_api" "this" {
       types = [var.endpoint_type]
     }
   }
+
+  lifecycle {
+    precondition {
+      condition     = (var.domain_name == null) == (var.certificate_arn == null)
+      error_message = "Both domain_name and certificate_arn must be set together. You cannot set one without the other."
+    }
+  }
+}
+
+resource "aws_api_gateway_domain_name" "this" {
+  count = local.create_custom_domain ? 1 : 0
+
+  domain_name = var.domain_name
+  endpoint_configuration {
+    types = ["PRIVATE"]
+  }
+  certificate_arn = var.certificate_arn
+  tags            = var.tags
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "execute-api:Invoke"
+        Resource  = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_api_gateway_domain_name_access_association" "this" {
+  count = local.create_custom_domain ? 1 : 0
+
+  domain_name_arn                = aws_api_gateway_domain_name.this[0].arn
+  access_association_source      = one(var.vpc_endpoint_ids)
+  access_association_source_type = "VPCE"
+  tags                           = var.tags
+}
+
+resource "aws_api_gateway_base_path_mapping" "this" {
+  count = local.create_custom_domain ? 1 : 0
+
+  api_id         = aws_api_gateway_rest_api.this[0].id
+  stage_name     = var.stage_name
+  domain_name    = aws_api_gateway_domain_name.this[0].domain_name
+  domain_name_id = aws_api_gateway_domain_name.this[0].domain_name_id
 }
 
 data "aws_iam_policy_document" "vpc_endpoint_allow" {
@@ -217,36 +265,41 @@ resource "aws_api_gateway_authorizer" "cognito" {
 
 # if logging is enabled we create a log group for the access logs and also make sure that the api gateway is able to log to the group
 module "log-group" {
-  source = "github.com/terraform-aws-modules/terraform-aws-cloudwatch//modules/log-group?ref=v5.1.0"
+  source  = "terraform-aws-modules/cloudwatch/aws//modules/log-group"
+  version = "5.7.2"
 
   create = local.create_log_group
 
   name_prefix       = "/aws/apigateway/${var.name}-"
   retention_in_days = 7
+  tags              = var.tags
 }
 
 resource "aws_api_gateway_account" "settings" {
-  cloudwatch_role_arn = local.create_log_group ? module.log-group-role.roles["ApiGatewayLogs"].arn : null
+  cloudwatch_role_arn = local.create_log_group ? module.log-group-role.arn : null
 }
 
 module "log-group-role" {
-  source = "github.com/Flaconi/terraform-aws-iam-roles?ref=v7.3.0"
+  source          = "terraform-aws-modules/iam/aws//modules/iam-role"
+  version         = "6.4.0"
+  create          = local.create_log_group
+  name            = "ApiGatewayLogs"
+  use_name_prefix = false
+  description     = "Managed by Terraform"
 
-  roles = local.create_log_group ? [
-    {
-      name                 = "ApiGatewayLogs"
-      instance_profile     = null
-      path                 = null
-      desc                 = null
-      trust_policy_file    = "data/api-gateway.json"
-      permissions_boundary = null
-      policies             = []
-      policy_arns = [
-        "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-      ]
-      inline_policies = []
-    },
-  ] : []
-
-  tags = var.tags
+  trust_policy_permissions = {
+    TrustRoleAndServiceToAssume = {
+      actions = ["sts:AssumeRole"],
+      principals = [{
+        type        = "Service",
+        identifiers = ["apigateway.amazonaws.com"]
+      }]
+    }
+  }
+  policies = {
+    AmazonAPIGatewayPushToCloudWatchLogs = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+  }
+  tags = merge(var.tags, {
+    Name = "ApiGatewayLogs"
+  })
 }

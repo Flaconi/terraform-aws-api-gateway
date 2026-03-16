@@ -153,3 +153,15 @@ variable "gateway_response" {
   }))
   default = {}
 }
+
+variable "domain_name" {
+  type        = string
+  description = "The private custom domain name (e.g. private-api.example.com)"
+  default     = null
+}
+
+variable "certificate_arn" {
+  type        = string
+  description = "ARN of the regional ACM certificate for the domain"
+  default     = null
+}
