@@ -20,7 +20,7 @@ For requirements regarding module structure: [style-guide-terraform.md](https://
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | >= 3.6 |
 
 <!-- TFDOCS_PROVIDER_END -->
@@ -30,8 +30,8 @@ For requirements regarding module structure: [style-guide-terraform.md](https://
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.3 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.8 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | >= 3.6 |
 
 <!-- TFDOCS_REQUIREMENTS_END -->
@@ -170,6 +170,22 @@ map(object({
 ```
 
 Default: `{}`
+
+### <a name="input_domain_name"></a> [domain\_name](#input\_domain\_name)
+
+Description: The private custom domain name (e.g. private-api.example.com)
+
+Type: `string`
+
+Default: `null`
+
+### <a name="input_certificate_arn"></a> [certificate\_arn](#input\_certificate\_arn)
+
+Description: ARN of the regional ACM certificate for the domain
+
+Type: `string`
+
+Default: `null`
 
 <!-- TFDOCS_INPUTS_END -->
 
