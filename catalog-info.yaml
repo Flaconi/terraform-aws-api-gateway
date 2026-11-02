@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-aws-api-gateway
+  description: >
+    Create api gateway for sharing in sls configs
+  annotations:
+    github.com/project-slug: Flaconi/terraform-aws-api-gateway
+  tags:
+    - terraform
+    - aws
+    - api-gateway
+
+spec:
+  type: library
+  lifecycle: production
+  owner: group:platform
+  system: aws-infrastructure
+  providesApis: []
