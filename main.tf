@@ -281,7 +281,7 @@ resource "aws_api_gateway_account" "settings" {
 
 module "log-group-role" {
   source          = "terraform-aws-modules/iam/aws//modules/iam-role"
-  version         = "6.4.0"
+  version         = "6.8.2"
   create          = local.create_log_group
   name            = "ApiGatewayLogs"
   use_name_prefix = false
