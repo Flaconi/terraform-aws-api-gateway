@@ -266,7 +266,7 @@ resource "aws_api_gateway_authorizer" "cognito" {
 # if logging is enabled we create a log group for the access logs and also make sure that the api gateway is able to log to the group
 module "log-group" {
   source  = "terraform-aws-modules/cloudwatch/aws//modules/log-group"
-  version = "5.7.3"
+  version = "6.0.0"
 
   create = local.create_log_group
 
