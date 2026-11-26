@@ -263,6 +263,18 @@ resource "aws_api_gateway_authorizer" "cognito" {
   provider_arns = var.cognito_provider_arns
 }
 
+resource "aws_api_gateway_authorizer" "lambda" {
+  for_each = local.enabled ? var.lambda_authorizers : {}
+
+  name                             = each.key
+  rest_api_id                      = aws_api_gateway_rest_api.this[0].id
+  type                             = each.value.type
+  authorizer_uri                   = each.value.authorizer_uri
+  identity_source                  = each.value.identity_source
+  authorizer_result_ttl_in_seconds = each.value.authorizer_result_ttl_in_seconds
+  authorizer_credentials           = each.value.authorizer_credentials
+}
+
 # if logging is enabled we create a log group for the access logs and also make sure that the api gateway is able to log to the group
 module "log-group" {
   source  = "terraform-aws-modules/cloudwatch/aws//modules/log-group"

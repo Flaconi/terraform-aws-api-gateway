@@ -130,6 +130,26 @@ variable "cognito_provider_arns" {
   description = "List of Cognito user pool ARNS"
 }
 
+variable "lambda_authorizers" {
+  type = map(object({
+    # Lambda invoke ARN: arn:aws:apigateway:<region>:lambda:path/2015-03-31/functions/<function arn>/invocations
+    authorizer_uri = string
+    type           = optional(string, "REQUEST")
+    # REQUEST: comma-separated mapping expressions, e.g. "method.request.header.Authorization,context.httpMethod,context.path"
+    identity_source                  = optional(string, "method.request.header.Authorization")
+    authorizer_result_ttl_in_seconds = optional(number, 300)
+    # IAM role API Gateway assumes to invoke the Lambda; null relies on the Lambda's resource policy
+    authorizer_credentials = optional(string)
+  }))
+  default     = {}
+  description = "Lambda authorizers to create, keyed by authorizer name"
+
+  validation {
+    condition     = alltrue([for a in values(var.lambda_authorizers) : contains(["REQUEST", "TOKEN"], a.type)])
+    error_message = "lambda_authorizers[*].type must be REQUEST or TOKEN."
+  }
+}
+
 variable "default_integration_enabled" {
   type        = bool
   default     = false
