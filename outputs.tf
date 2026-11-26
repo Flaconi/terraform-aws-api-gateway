@@ -13,6 +13,11 @@ output "cognito_authorizer_id" {
   value       = try(aws_api_gateway_authorizer.cognito[0].id, null)
 }
 
+output "lambda_authorizer_ids" {
+  description = "Map of Lambda authorizer name to authorizer ID"
+  value       = { for k, v in aws_api_gateway_authorizer.lambda : k => v.id }
+}
+
 output "api_url" {
   description = "The URL to invoke the API pointing to the stage"
   value       = try(aws_api_gateway_stage.this[0].invoke_url, null)

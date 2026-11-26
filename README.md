@@ -137,6 +137,27 @@ Type: `set(string)`
 
 Default: `[]`
 
+### <a name="input_lambda_authorizers"></a> [lambda\_authorizers](#input\_lambda\_authorizers)
+
+Description: Lambda authorizers to create, keyed by authorizer name
+
+Type:
+
+```hcl
+map(object({
+    # Lambda invoke ARN: arn:aws:apigateway:<region>:lambda:path/2015-03-31/functions/<function arn>/invocations
+    authorizer_uri = string
+    type           = optional(string, "REQUEST")
+    # REQUEST: comma-separated mapping expressions, e.g. "method.request.header.Authorization,context.httpMethod,context.path"
+    identity_source                  = optional(string, "method.request.header.Authorization")
+    authorizer_result_ttl_in_seconds = optional(number, 300)
+    # IAM role API Gateway assumes to invoke the Lambda; null relies on the Lambda's resource policy
+    authorizer_credentials = optional(string)
+  }))
+```
+
+Default: `{}`
+
 ### <a name="input_default_integration_enabled"></a> [default\_integration\_enabled](#input\_default\_integration\_enabled)
 
 Description: Set to true to enable a initial default integration to allow policy deployments for a sharded gateway
@@ -197,6 +218,7 @@ Default: `null`
 | <a name="output_api_url"></a> [api\_url](#output\_api\_url) | The URL to invoke the API pointing to the stage |
 | <a name="output_cognito_authorizer_id"></a> [cognito\_authorizer\_id](#output\_cognito\_authorizer\_id) | The authorizer ID of the REST API's cognito authorizer |
 | <a name="output_id"></a> [id](#output\_id) | The ID of the REST API |
+| <a name="output_lambda_authorizer_ids"></a> [lambda\_authorizer\_ids](#output\_lambda\_authorizer\_ids) | Map of Lambda authorizer name to authorizer ID |
 | <a name="output_resources_paths_map"></a> [resources\_paths\_map](#output\_resources\_paths\_map) | Map of resource paths to id in api gateway |
 | <a name="output_root_resource_id"></a> [root\_resource\_id](#output\_root\_resource\_id) | The resource ID of the REST API's root |
 
